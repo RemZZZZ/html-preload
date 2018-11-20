@@ -1,0 +1,39 @@
+HTML5中rel属性的prefetch预加载功能使用
+
+<link rel = 'prefetch' href='...'>
+<link rel = 'subresource' href='...'>
+<link rel = 'prerender' href='...'>
+
+perfetch用来初始化对后续导航中资源的获取。prefetch指定的资源获取优先级是最低的。
+subresource用来标识出重要的资源，浏览器会在当前访问页面时立即下载它们。
+
+subresource的语义是当前页面的子资源，浏览器会立即下载它们。 subresource的优先级高于prefetch。
+
+合适的时候，你甚至可以用prerender来让浏览器在后台事先渲染好整个页面，这样它的打开速度将会是0秒
+因为要渲染整个页面，所以它需要的所有资源也会被全部下载。如果里面的JS需要在页面显示时运行，可以通过页面可见性API来实现。当然只有GET才是可以预先渲染的，预渲染POST当然是不安全的。
+
+预加载可以加载页面，视频，图片，js等资源
+<link rel="prerender" href="http://www.example.com/">
+<link rel="prefetch" href="/images/test.jpg"/>
+
+不是所有的资源都可以预加载
+当资源为以下列表中的资源时，将阻止预渲染操作：
+1.URL 中包含下载资源
+2.页面中包含音频、视频
+3.POST、PUT 和 DELETE 操作的 ajax 请求
+4.HTTP 认证(Authentication)
+5.HTTPS 页面
+6.含恶意软件的页面
+7.弹窗页面
+8.占用资源很多的页面
+9.打开了 chrome developer tools 开发工具
+
+手动触发预渲染操作
+在 head 中强势插入 link[rel='prerender'] 即可：
+
+JavaScript Code
+
+var hint =document.createElement("link")
+hint.setAttribute(“rel”,”prerender”)
+hint.setAttribute(“href”,”next-page.html”)
+document.getElementsByTagName(“head”)[0].appendChild(hint)
