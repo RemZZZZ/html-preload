@@ -3,19 +3,33 @@ HTML5中rel属性的prefetch预加载功能使用
 <link rel = 'prefetch' href='...'>
 <link rel = 'subresource' href='...'>
 <link rel = 'prerender' href='...'>
+<link rel="preload" href="..." >
 
 perfetch用来初始化对后续导航中资源的获取。prefetch指定的资源获取优先级是最低的。
 subresource用来标识出重要的资源，浏览器会在当前访问页面时立即下载它们。
 
 subresource的语义是当前页面的子资源，浏览器会立即下载它们。 subresource的优先级高于prefetch。
+<link rel=“subresource”>的设计初衷是处理当前页面，但因为开发者无法控制资源的加载优先级，因此 Chrome 和基于 Chrome 的浏览器在处理此类标签时，优先级很低，在大多数情况下，用了等于没用。
+<link rel=“prefetch”>的作用是告诉浏览器加载下一页面可能会用到的资源，注意，是下一页面，而不是当前页面。因此该方法的加载优先级非常低，也就是说该方式的作用是加速下一个页面的加载速度。
 
-合适的时候，你甚至可以用prerender来让浏览器在后台事先渲染好整个页面，这样它的打开速度将会是0秒
-因为要渲染整个页面，所以它需要的所有资源也会被全部下载。如果里面的JS需要在页面显示时运行，可以通过页面可见性API来实现。当然只有GET才是可以预先渲染的，预渲染POST当然是不安全的。
+预加载：(兼容性比较差)
+Preload是为处理当前页面所生，这点和 subresource 一样，但他们之间有着细微且意义重大的区别。Preload 有 as 属性，这让浏览器可做一些 subresource 和 prefetch 无法实现的事：
+·浏览器可以设置正确的资源加载优先级，这种方式可以确保资源根据其重要性依次加载， 所以，Preload既不会影响重要资源的加载，又不会让次要资源影响自身的加载。
+·浏览器可以确保请求是符合内容安全策略的，比如，如果我们的安全策略是Content-Security-Policy: script-src 'self'，只允许浏览器执行自家服务器的脚本，as 值为 script 的外部服务器资源就不会被加载。
+·浏览器能根据 as 的值发送适当的 Accept 头部信息
+·浏览器通过 as 值能得知资源类型，因此当获取的资源相同时，浏览器能够判断前面获取的资源是否能重用。
+Preload 的与众不同还体现在 onload 事件上（至少在 Chrome 中，prefetch 和 subresource 是不支持的）。也就是说你可以定义资源加载完毕后的回调函数。
+<link rel="preload" href="..." as="..." onload="preloadFinished()">
 
-预加载可以加载页面，视频，图片，js等资源
-<link rel="prerender" href="http://www.example.com/">
-<link rel="prefetch" href="/images/test.jpg"/>
+as 属性的作用是告诉浏览器被加载的是什么资源，可能的 as 值包括：
+"script"
+"style"
+"image"
+"media"
+"document"
 
+
+预渲染：
 不是所有的资源都可以预加载
 当资源为以下列表中的资源时，将阻止预渲染操作：
 1.URL 中包含下载资源
